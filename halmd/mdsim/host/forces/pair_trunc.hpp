@@ -215,8 +215,6 @@ inline void pair_trunc<dimension, float_type, potential_type, trunc_type>::compu
         std::fill(force->begin(), force->end(), 0);
     }
 
-    // whether Newton's third law applies
-    bool const reactio = false;//(particle1_ == particle2_);
 
     for (size_type i = 0; i < nparticle1; ++i) {
         // calculate pairwise force with neighbour particles
@@ -306,11 +304,6 @@ inline void pair_trunc<dimension, float_type, potential_type, trunc_type>::compu
             (*en_pot)[i]      += en;
             (*stress_pot)[i]  += stress;
 
-            // store contributions for second particle
-            if (reactio) {
-                (*en_pot)[j]      += en;
-                (*stress_pot)[j]  += stress;
-            }
         }
     }
 }
