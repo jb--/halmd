@@ -204,7 +204,7 @@ inline void pair_full<dimension, float_type, potential_type>::compute_()
     }
 
     // whether Newton's third law applies
-    bool const reactio = (particle1_ == particle2_);
+    bool const reactio = false;
 
     for (size_type i = 0; i < nparticle1; ++i) {
         // calculate untruncated pairwise force with all other particles
@@ -256,7 +256,7 @@ inline void pair_full<dimension, float_type, potential_type>::compute_aux_()
     }
 
     // whether Newton's third law applies
-    bool const reactio = (particle1_ == particle2_);
+    bool const reactio = false;
 
     float_type weight = aux_weight_;
     if (reactio) {

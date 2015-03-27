@@ -236,7 +236,7 @@ inline void pair_trunc<dimension, float_type, potential_type, trunc_type>::compu
             std::tie(fval, pot) = (*potential_)(rr, a, b);
 
             // optionally smooth potential yielding continuous 2nd derivative
-            (*trunc_)(std::sqrt(rr), potential_->r_cut(a, b), fval, pot);
+            //(*trunc_)(std::sqrt(rr), potential_->r_cut(a, b), fval, pot);
 
             // add force contribution to both particles
             (*force)[i] += r * fval;
@@ -290,7 +290,7 @@ inline void pair_trunc<dimension, float_type, potential_type, trunc_type>::compu
             std::tie(fval, pot) = (*potential_)(rr, a, b);
 
             // optionally smooth potential yielding continuous 2nd derivative
-            (*trunc_)(std::sqrt(rr), potential_->r_cut(a, b), fval, pot);
+            //(*trunc_)(std::sqrt(rr), potential_->r_cut(a, b), fval, pot);
 
             // add force contribution to both particles
             (*force)[i] += r * fval;

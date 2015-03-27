@@ -73,12 +73,14 @@ void brownian<dimension, float_type>::integrate()
 {
     LOG_TRACE("update positions and velocities")
     force_array_type const& force = read_cache(particle_->force());
+    mass_array_type const& mass = read_cache(particle_->mass());
     size_type nparticle = particle_->nparticle();
 
     // invalidate the particle caches after accessing the force!
     auto position = make_cache_mutable(particle_->position());
     auto image = make_cache_mutable(particle_->image());
-    
+    auto velocity = make_cache_mutable(particle_->velocity());
+
     scoped_timer_type timer(runtime_.integrate);
 
     // cache random numbers
@@ -119,8 +121,15 @@ template <int dimension, typename float_type>
 void brownian<dimension, float_type>::finalize()
 {
     LOG_TRACE("update velocities")
-    scoped_timer_type timer(runtime_.finalize);
 
+    force_array_type const& force = read_cache(particle_->force());
+    mass_array_type const& mass = read_cache(particle_->mass());
+    size_type nparticle = particle_->nparticle();
+
+    // invalidate the particle caches after accessing the force!
+    auto velocity = make_cache_mutable(particle_->velocity());
+
+    scoped_timer_type timer(runtime_.finalize);
 }
 
 template <int dimension, typename float_type>
