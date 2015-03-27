@@ -216,7 +216,7 @@ inline void pair_trunc<dimension, float_type, potential_type, trunc_type>::compu
     }
 
     // whether Newton's third law applies
-    bool const reactio = (particle1_ == particle2_);
+    bool const reactio = false;//(particle1_ == particle2_);
 
     for (size_type i = 0; i < nparticle1; ++i) {
         // calculate pairwise force with neighbour particles
@@ -242,9 +242,6 @@ inline void pair_trunc<dimension, float_type, potential_type, trunc_type>::compu
 
             // add force contribution to both particles
             (*force)[i] += r * fval;
-            if (reactio) {
-                (*force)[j] -= r * fval;
-            }
         }
     }
 }
@@ -274,13 +271,6 @@ inline void pair_trunc<dimension, float_type, potential_type, trunc_type>::compu
         std::fill(stress_pot->begin(), stress_pot->end(), 0);
     }
 
-    // whether Newton's third law applies
-    bool const reactio = (particle1_ == particle2_);
-
-    float_type weight = aux_weight_;
-    if (reactio) {
-        weight /= 2;
-    }
 
     for (size_type i = 0; i < nparticle1; ++i) {
         // calculate pairwise force with neighbour particles
@@ -306,14 +296,11 @@ inline void pair_trunc<dimension, float_type, potential_type, trunc_type>::compu
 
             // add force contribution to both particles
             (*force)[i] += r * fval;
-            if (reactio) {
-                (*force)[j] -= r * fval;
-            }
 
             // contribution to potential energy
-            en_pot_type en = weight * pot;
+            en_pot_type en = pot;
             // potential part of stress tensor
-            stress_pot_type stress = weight * fval * make_stress_tensor(r);
+            stress_pot_type stress =  fval * make_stress_tensor(r);
 
             // store contributions for first particle
             (*en_pot)[i]      += en;

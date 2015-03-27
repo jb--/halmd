@@ -25,6 +25,20 @@ if(${HALMD_WITH_pair_lennard_jones})
   endif()
 endif()
 
+if(${HALMD_WITH_pair_yukawa_shifted})
+  add_executable(test_unit_mdsim_potentials_yukawa_shifted
+    yukawa_shifted.cpp
+  )
+  target_link_libraries(test_unit_mdsim_potentials_yukawa_shifted
+    halmd_mdsim_host_potentials_pair_yukawa_shifted
+    halmd_mdsim
+    ${HALMD_TEST_LIBRARIES}
+  )
+  add_test(unit/mdsim/potentials/pair/yukawa_shifted/host
+    test_unit_mdsim_potentials_pair_yukawa_shifted --run_test=yukawa_shifted_host --log_level=test_suite
+  )
+endif()
+
 if(${HALMD_WITH_pair_lennard_jones_linear})
   add_executable(test_unit_mdsim_potentials_pair_lennard_jones_linear
     lennard_jones_linear.cpp

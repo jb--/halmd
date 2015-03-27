@@ -1,0 +1,134 @@
+--
+-- Copyright © 2014 Jörg Bartnick
+-- Copyright © 2010-2012 Peter Colberg
+-- Copyright © 2010 Felix Höfling
+--
+-- This file is part of HALMD.
+--
+-- HALMD is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+--
+
+local clock             = require("halmd.mdsim.clock")
+local core              = require("halmd.mdsim.core")
+local log               = require("halmd.io.log")
+local module            = require("halmd.utility.module")
+local profiler          = require("halmd.utility.profiler")
+local random            = require("halmd.random")
+local utility           = require("halmd.utility")
+
+---
+-- Brownian dynamics simulation 
+-- ========================================
+--
+-- This module implements Brownian dynamics.
+--
+
+-- grab C++ wrappers
+local brownian = assert(libhalmd.mdsim.integrators.brownian)
+
+---
+-- Construct velocity-Verlet with Andersen thermostat.
+--
+-- :param table args: keyword arguments
+-- :param args.particle: instance of :class:`halmd.mdsim.particle`
+-- :param args.box: instance of :class:`halmd.mdsim.box`
+-- :param number args.temperature: temperature of heat bath
+-- :param number args.rate: collision rate
+-- :param number args.timestep: integration timestep (defaults to :attr:`halmd.mdsim.clock.timestep`)
+--
+-- .. method:: set_timestep(timestep)
+--
+--    Set integration time step in MD units.
+--
+--    :param number timestep: integration timestep
+--
+--    This method forwards to :meth:`halmd.mdsim.clock.set_timestep`,
+--    to ensure that all integrators use an identical time step.
+--
+-- .. attribute:: timestep
+--
+--    Integration time step.
+--
+-- .. method:: set_temperature(temperature)
+--
+--    Set temperature of surrounding solvent.
+--
+--    :param number temperature: temperature of heat bath
+--
+-- .. attribute:: temperature
+--
+--    Temperature of surrounding solvent.
+--
+-- .. attribute:: mobility
+--
+--    Define the mobility of the particles. Different mobility for different species is not yet implemented.
+--
+-- .. method:: disconnect()
+--
+--    Disconnect integrator from core and profiler.
+--
+-- .. method:: integrate()
+--
+--    Empty method to comply for compatibility with halmd
+--
+--    By default this function is connected to :meth:`halmd.mdsim.core.on_integrate`.
+--
+-- .. method:: finalize()
+--
+--    Forward time integration - computes random force and displaces particle.
+--
+--    By default this function is connected to :meth:`halmd.mdsim.core.on_finalize`.
+--
+local M = module(function(args)
+    local particle = utility.assert_kwarg(args, "particle")
+    local box = utility.assert_kwarg(args, "box")
+    local temperature = utility.assert_kwarg(args, "temperature")
+    local mobility = utility.assert_kwarg(args, "mobility")
+    local timestep = args.timestep
+    if timestep then
+        clock:set_timestep(timestep)
+    else
+        timestep = assert(clock.timestep)
+    end
+    local rng = random.generator({memory = particle.memory})
+    local logger = log.logger({label = "brownian"})
+
+    -- construct instance
+    local self = brownian(particle, box, rng, timestep, temperature, mobility, logger)
+
+    -- capture C++ method set_timestep
+    local set_timestep = assert(self.set_timestep)
+    -- forward Lua method set_timestep to clock
+    self.set_timestep = function(self, timestep)
+        return clock:set_timestep(timestep)
+    end
+
+    -- sequence of signal connections
+    local conn = {}
+    self.disconnect = utility.signal.disconnect(conn, "integrator")
+
+    -- connect integrator to core and profiler
+    table.insert(conn, clock:on_set_timestep(function(timestep) set_timestep(self, timestep) end))
+    table.insert(conn, core:on_integrate(function() self:integrate() end))
+    table.insert(conn, core:on_finalize(function() self:finalize() end))
+
+    local runtime = assert(self.runtime)
+    table.insert(conn, profiler:on_profile(runtime.integrate, "empty calls in brownian integrator"))
+    table.insert(conn, assert(profiler:on_profile(runtime.finalize,
+        "browniain dynamics integrator")))
+
+    return self
+end)
+
+return M

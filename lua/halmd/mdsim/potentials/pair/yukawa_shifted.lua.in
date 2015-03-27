@@ -1,0 +1,162 @@
+--
+-- Copyright © 2011,2013 Felix Höfling
+-- Copyright © 2011      Michael Kopp
+-- Copyright © 2013      Nicolas Höft
+--
+-- This file is part of HALMD.
+--
+-- HALMD is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+--
+
+local device            = require("halmd.utility.device")
+local log               = require("halmd.io.log")
+local numeric           = require("halmd.numeric")
+local utility           = require("halmd.utility")
+local module            = require("halmd.utility.module")
+
+---
+-- Yukawa potential
+-- ===================
+--
+-- This module implements the Yukawa potential,
+--
+-- .. math::
+--
+--    U\left(r_{ij}\right) = {\gamma_{ij}}
+--        \exp\left({\kappa_{ij}}\sqrt{{r_{ij}}^2+{\delta_{ij}}^2}\right) /\sqrt{{r_{ij}}^2+{\delta_{ij}}^2}  \/,
+--
+-- for the interaction between two particles of species :math:`i` and :math:`j`
+--
+
+-- grab C++ wrappers
+local yukawa_shifted = {
+    host = libhalmd.mdsim.host.potentials.pair.yukawa_shifted
+}
+
+---
+-- Construct yukawa potential.
+--
+-- :param table args: keyword arguments
+-- :param table args.gamma: matrix with elements :math:`\gamma_{ij}` (*default:* ``1``)
+-- :param table args.kappa: matrix with elements :math:`\kappa_{ij}` (*default:* ``1``)
+-- :param table args.delta: matrix with elements :math:`\delta_{ij}` (*default:* ``1``)
+-- :param table args.cutoff: matrix with elements :math:`r_{\text{c}, ij}`
+-- :param number args.species: number of particle species *(optional)*
+-- :param string args.memory: select memory location *(optional)*
+-- :param string args.label: instance label *(optional)*
+--
+-- If the argument ``species`` is omitted, it is inferred from the first
+-- dimension of the parameter matrices.
+--
+-- If all elements of a matrix are equal, a scalar value may be passed instead
+-- which is promoted to a square matrix of size given by the number of particle
+-- ``species``.
+--
+-- The supported values for ``memory`` are "host" and "gpu". If ``memory`` is
+-- not specified, the memory location is selected according to the compute
+-- device.
+--
+-- .. note::
+--
+--    The cutoff is only relevant with :class:`halmd.mdsim.forces.pair_trunc`.
+--
+-- .. attribute:: gamma
+--
+--    Matrix with elements :math:`\gamma_{ij}`.
+--
+-- .. attribute:: kappa
+--
+--    Matrix with elements :math:`\kappa_{ij}`.
+--
+-- .. attribute:: r_cut
+--
+--    Matrix with power-law indices :math:`n_{ij}`
+--
+-- .. attribute:: description
+--
+--    Name of potential for profiler.
+--
+-- .. attribute:: memory
+--
+--    Device where the particle memory resides.
+--
+local M = module(function(args)
+    local gamma = args and args.gamma or 1
+    if type(gamma) ~= "table" and type(gamma) ~= "number" then
+        error("bad argument 'gamma'", 2)
+    end
+    local kappa = args and args.kappa or 1
+    if type(kappa) ~= "table" and type(kappa) ~= "number" then
+        error("bad argument 'kappa'", 2)
+    end
+    local delta = args and args.delta or 1
+    if type(delta) ~= "table" and type(delta) ~= "number" then
+        error("bad argument 'delta'", 2)
+    end
+    local cutoff = utility.assert_kwarg(args, "cutoff")
+    if type(cutoff) ~= "table" and type(cutoff) ~= "number" then
+        error("bad argument 'cutoff'", 2)
+    end
+
+    local memory = args and args.memory or (device.gpu and "gpu" or "host")
+
+    local label = args and args.label and utility.assert_type(args.label, "string")
+    label = label and (" (%s)"):format(label) or ""
+    local logger = log.logger({label =  "yukawa_shifted" .. label})
+
+    -- derive number of species from parameter matrices
+    local species = args and args.species
+        or (type(gamma) == "table" and #gamma) 
+        or (type(kappa) == "table" and #kappa)
+        or (type(delta) == "table" and #delta)
+        or (type(cutoff) == "table" and #cutoff) or 1
+    utility.assert_type(species, "number")
+
+    if type(cutoff) == "number" then
+        cutoff = numeric.scalar_matrix(species, species, cutoff)
+    end
+    if type(gamma) == "number" then
+        gamma = numeric.scalar_matrix(species, species, gamma)
+    end
+    if type(kappa) == "number" then
+        kappa = numeric.scalar_matrix(species, species, kappa)
+    end
+    if type(delta) == "number" then
+        delta = numeric.scalar_matrix(species, species, delta)
+    end
+
+    -- construct instance
+    if not yukawa_shifted[memory] then
+        error(("unsupported memory type '%s'"):format(memory), 2)
+    end
+    local self = yukawa_shifted[memory](cutoff, gamma, kappa, delta, logger)
+
+    -- add description for profiler
+    self.description = property(function()
+        return "Shifted Yukawa potential" .. label
+    end)
+
+    -- store memory location
+    self.memory = property(function(self) return memory end)
+
+    -- add logger instance for pair_trunc
+    self.logger = property(function()
+        return logger
+    end)
+
+    return self
+end)
+
+
+return M
