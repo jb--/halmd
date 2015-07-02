@@ -45,3 +45,11 @@ halmd_add_potential(
   power_law_with_core.cpp
   power_law_with_core_kernel.cu
 )
+
+
+halmd_add_potential(
+  halmd_mdsim_gpu_potentials_pair_parabolic
+  pair parabolic
+  parabolic.cpp
+  parabolic_kernel.cu
+)

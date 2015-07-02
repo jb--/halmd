@@ -39,3 +39,9 @@ halmd_add_potential(
   pair yukawa_shifted
   yukawa_shifted.cpp
 )
+
+halmd_add_potential(
+  halmd_mdsim_host_potentials_pair_parabolic
+  pair parabolic
+  parabolic.cpp
+)
