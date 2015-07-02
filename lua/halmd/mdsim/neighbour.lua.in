@@ -1,5 +1,5 @@
 --
--- Copyright © 2013-2014  Nicolas Höft
+-- Copyright © 2013-2015  Nicolas Höft
 -- Copyright © 2010-2011  Peter Colberg
 --
 -- This file is part of HALMD.
@@ -35,6 +35,7 @@ local mdsim = {
 local neighbours = {
     from_binning  = assert(libhalmd.mdsim.neighbours.from_binning)
   , from_particle = assert(libhalmd.mdsim.neighbours.from_particle)
+  , is_binning_compatible = assert(libhalmd.mdsim.neighbours.is_binning_compatible)
 }
 
 local defaults
@@ -189,6 +190,18 @@ local M = module(function(args)
         end
         if binning[1].particle ~= particle[1] or binning[2].particle ~= particle[2] then
             error("'particle' instances of binning modules do not match with 'particle' argument", 2)
+        end
+
+        -- Test compatiblity of binning module and fall back to from_particle
+        -- if incompatible.
+        --
+        -- On the GPU, the binning module is required to have at least 3 cells
+        -- in each spatial direction in order to be used with the neighbour
+        -- module.
+        if not neighbours.is_binning_compatible(binning[1], binning[2]) then
+            binning = nil
+            log.info("binning parameters incompatible with neighbour list algorithm")
+            log.info("fall back to 'neighbours.from_particle'")
         end
     end
 

@@ -32,6 +32,7 @@ endif
 BASE64    = base64 -di
 CMAKE     = cmake
 CP        = cp -r
+CTEST     = ctest
 GIT       = git
 GUNZIP    = gzip -d
 MKDIR     = mkdir -p
@@ -183,10 +184,10 @@ env-lua:
 ## LuaJIT
 ##
 
-LUAJIT_VERSION = 2.0.3
+LUAJIT_VERSION = 2.0.4
 LUAJIT_TARBALL = LuaJIT-$(LUAJIT_VERSION).tar.gz
 LUAJIT_TARBALL_URL = http://luajit.org/download/$(LUAJIT_TARBALL)
-LUAJIT_TARBALL_SHA256 = 55be6cb2d101ed38acca32c5b1f99ae345904b365b642203194c585d27bebd79
+LUAJIT_TARBALL_SHA256 = 620fa4eb12375021bef6e4f237cbd2dd5d49e56beb414bee052c746beef1807d
 LUAJIT_BUILD_DIR = LuaJIT-$(LUAJIT_VERSION)
 LUAJIT_INSTALL_DIR = $(PREFIX)/luajit-$(LUAJIT_VERSION)
 LUAJIT_CFLAGS = -fPIC -DLUAJIT_ENABLE_LUA52COMPAT -DLUAJIT_CPU_SSE2
@@ -265,13 +266,13 @@ distclean-luatrace: clean-luatrace
 ## Boost C++ libraries with C++11 ABI
 ##
 
-BOOST_VERSION = 1.57.0
-BOOST_RELEASE = 1_57_0
+BOOST_VERSION = 1.58.0
+BOOST_RELEASE = 1_58_0
 BOOST_ABI = c++11
 BOOST_TOOLSET = gcc
 BOOST_TARBALL = boost_$(BOOST_RELEASE).tar.bz2
 BOOST_TARBALL_URL = http://sourceforge.net/projects/boost/files/boost/$(BOOST_VERSION)/$(BOOST_TARBALL)
-BOOST_TARBALL_SHA256 = 910c8c022a33ccec7f088bd65d4f14b466588dda94ba2124e78b8c57db264967
+BOOST_TARBALL_SHA256 = fdfc204fc33ec79c99b9a74944c3e54bd78be4f7f15e260c0e2700a36dc7d3e5
 BOOST_BUILD_DIR = boost_$(BOOST_RELEASE)
 BOOST_INSTALL_DIR = $(PREFIX)/boost_$(BOOST_RELEASE)-$(BOOST_ABI)
 BOOST_BUILD_FLAGS = threading=multi variant=release --layout=tagged toolset=$(BOOST_TOOLSET) cxxflags="-fPIC -std=$(BOOST_ABI)" dll-path=$(BOOST_INSTALL_DIR)/lib
@@ -331,10 +332,10 @@ env-boost:
 ##
 ## HDF5 library
 ##
-HDF5_VERSION = 1.8.14
+HDF5_VERSION = 1.8.15
 HDF5_TARBALL = hdf5-$(HDF5_VERSION).tar.bz2
 HDF5_TARBALL_URL = http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-$(HDF5_VERSION)/src/$(HDF5_TARBALL)
-HDF5_TARBALL_SHA256 = 53722cb9f5977af2908f92fc1a3f8c597800a5cb448cfe5c75060d6335bb9bab
+HDF5_TARBALL_SHA256 = 0003ac76314b9c3dd819f595eb33890f02f6bf000414013a89f9907ac09e3920
 HDF5_BUILD_DIR = hdf5-$(HDF5_VERSION)
 HDF5_INSTALL_DIR = $(PREFIX)/hdf5-$(HDF5_VERSION)
 HDF5_CONFIGURE_FLAGS = --enable-shared --enable-cxx --enable-fortran
@@ -448,13 +449,13 @@ distclean-curl: clean-curl
 ##
 ## Git version control
 ##
-GIT_VERSION = 2.1.2
+GIT_VERSION = 2.4.0
 GIT_TARBALL = git-$(GIT_VERSION).tar.gz
 GIT_TARBALL_URL = https://www.kernel.org/pub/software/scm/git/$(GIT_TARBALL)
-GIT_TARBALL_SHA256 = fc0af850ef82e6e9ed2940397e65fb45034fba676999eb8404ff31d8d1e388ec
+GIT_TARBALL_SHA256 = d58c766a80d86a5e1846c04c74618e98bfec158734fa1a8904c64740b72b511a
 GIT_MANPAGES_TARBALL = git-manpages-$(GIT_VERSION).tar.gz
 GIT_MANPAGES_TARBALL_URL = https://www.kernel.org/pub/software/scm/git/$(GIT_MANPAGES_TARBALL)
-GIT_MANPAGES_TARBALL_SHA256 = f5c553d346894452adc67ce69e20e83b01c272c0003dd4cf5f80fad2b9a61d7c
+GIT_MANPAGES_TARBALL_SHA256 = ab3f0824e0d17bd9ce5075964350b0ab13bb8991e85a87f7d822be882b3a102e
 GIT_BUILD_DIR = git-$(GIT_VERSION)
 GIT_CONFIGURE_FLAGS = --without-python
 GIT_INSTALL_DIR = $(PREFIX)/git-$(GIT_VERSION)
@@ -906,10 +907,10 @@ distclean-mpc: clean-mpc
 ## ISL (Integer Set Library)
 ##
 
-ISL_VERSION = 0.12.2
+ISL_VERSION = 0.14
 ISL_TARBALL = isl-$(ISL_VERSION).tar.bz2
 ISL_TARBALL_URL = ftp://ftp.fu-berlin.de/unix/languages/gcc/infrastructure/$(ISL_TARBALL)
-ISL_TARBALL_SHA256 = f4b3dbee9712850006e44f0db2103441ab3d13b406f77996d1df19ee89d11fb4
+ISL_TARBALL_SHA256 = 7e3c02ff52f8540f6a85534f54158968417fd676001651c8289c705bd0228f36
 ISL_BUILD_DIR = isl-$(ISL_VERSION)
 ISL_INSTALL_DIR = $(CURDIR)/.isl-$(ISL_VERSION)
 
@@ -957,67 +958,13 @@ distclean-isl: clean-isl
 	$(RM) $(ISL_INSTALL_DIR)
 
 ##
-## CLooG (Chunky Loop Generator)
-##
-
-CLOOG_VERSION = 0.18.1
-CLOOG_TARBALL = cloog-$(CLOOG_VERSION).tar.gz
-CLOOG_TARBALL_URL = ftp://ftp.fu-berlin.de/unix/languages/gcc/infrastructure/$(CLOOG_TARBALL)
-CLOOG_TARBALL_SHA256 = 02500a4edd14875f94fe84cbeda4290425cb0c1c2474c6f75d75a303d64b4196
-CLOOG_BUILD_DIR = cloog-$(CLOOG_VERSION)
-CLOOG_INSTALL_DIR = $(CURDIR)/.cloog-$(CLOOG_VERSION)
-
-.fetch-cloog-$(CLOOG_VERSION):
-	@$(RM) $(CLOOG_TARBALL)
-	$(WGET) $(CLOOG_TARBALL_URL)
-	@echo '$(CLOOG_TARBALL_SHA256)  $(CLOOG_TARBALL)' | $(SHA256SUM)
-	@$(TOUCH) $@
-
-fetch-cloog: .fetch-cloog-$(CLOOG_VERSION)
-
-.extract-cloog-$(CLOOG_VERSION): .fetch-cloog-$(CLOOG_VERSION)
-	$(RM) $(CLOOG_BUILD_DIR)
-	$(TAR) -xzf $(CLOOG_TARBALL)
-	@$(TOUCH) $@
-
-extract-cloog: .extract-cloog-$(CLOOG_VERSION)
-
-.configure-cloog-$(CLOOG_VERSION): .extract-cloog-$(CLOOG_VERSION) .install-isl-$(ISL_VERSION) .install-gmp-$(GMP_VERSION)
-	cd $(CLOOG_BUILD_DIR) && LDFLAGS="-L$(GMP_INSTALL_DIR)/lib -L$(ISL_INSTALL_DIR) -lm" ./configure --prefix=$(CLOOG_INSTALL_DIR) --libdir=$(CLOOG_INSTALL_DIR)/lib --with-isl-prefix=$(ISL_INSTALL_DIR) --with-gmp-prefix=$(GMP_INSTALL_DIR) --disable-shared
-	@$(TOUCH) $@
-
-configure-cloog: .configure-cloog-$(CLOOG_VERSION)
-
-.build-cloog-$(CLOOG_VERSION): .configure-cloog-$(CLOOG_VERSION)
-	cd $(CLOOG_BUILD_DIR) && $(MAKE) $(PARALLEL_BUILD_FLAGS)
-	@$(TOUCH) $@
-
-build-cloog: .build-cloog-$(CLOOG_VERSION)
-
-.install-cloog-$(CLOOG_VERSION): .build-cloog-$(CLOOG_VERSION)
-	cd $(CLOOG_BUILD_DIR) && $(MAKE) install
-	@$(TOUCH) $@
-
-clean-cloog:
-	@$(RM) .build-cloog-$(CLOOG_VERSION)
-	@$(RM) .configure-cloog-$(CLOOG_VERSION)
-	@$(RM) .extract-cloog-$(CLOOG_VERSION)
-	$(RM) $(CLOOG_BUILD_DIR)
-
-distclean-cloog: clean-cloog
-	@$(RM) .fetch-cloog-$(CLOOG_VERSION)
-	@$(RM) .install-cloog-$(CLOOG_VERSION)
-	$(RM) $(CLOOG_TARBALL)
-	$(RM) $(CLOOG_INSTALL_DIR)
-
-##
 ## GCC (GNU Compiler Collection)
 ##
 
-GCC_VERSION = 4.9.2
+GCC_VERSION = 5.1.0
 GCC_TARBALL = gcc-$(GCC_VERSION).tar.bz2
 GCC_TARBALL_URL = http://ftp.gwdg.de/pub/misc/gcc/releases/gcc-$(GCC_VERSION)/$(GCC_TARBALL)
-GCC_TARBALL_SHA256 = 2020c98295856aa13fda0f2f3a4794490757fc24bcca918d52cc8b4917b972dd
+GCC_TARBALL_SHA256 = b7dafdf89cbb0e20333dbf5b5349319ae06e3d1a30bf3515b5488f7e89dca5ad
 GCC_BUILD_DIR = gcc-$(GCC_VERSION)
 GCC_BUILD_FLAGS = --enable-cxx-flags=-fPIC --enable-languages=c,c++,fortran,lto --disable-multilib
 GCC_INSTALL_DIR = $(PREFIX)/gcc-$(GCC_VERSION)
@@ -1028,7 +975,7 @@ GCC_INSTALL_DIR = $(PREFIX)/gcc-$(GCC_VERSION)
 	@echo '$(GCC_TARBALL_SHA256)  $(GCC_TARBALL)' | $(SHA256SUM)
 	@$(TOUCH) $@
 
-fetch-gcc: .fetch-gcc-$(GCC_VERSION) .fetch-gmp-$(GMP_VERSION) .fetch-mpfr-$(MPFR_VERSION) .fetch-mpc-$(MPC_VERSION) .fetch-isl-$(ISL_VERSION) .fetch-cloog-$(CLOOG_VERSION)
+fetch-gcc: .fetch-gcc-$(GCC_VERSION) .fetch-gmp-$(GMP_VERSION) .fetch-mpfr-$(MPFR_VERSION) .fetch-mpc-$(MPC_VERSION) .fetch-isl-$(ISL_VERSION)
 
 .extract-gcc-$(GCC_VERSION): .fetch-gcc-$(GCC_VERSION) .extract-gmp-$(GMP_VERSION) .extract-mpfr-$(MPFR_VERSION) .extract-mpc-$(MPC_VERSION)
 	$(RM) $(GCC_BUILD_DIR)
@@ -1040,8 +987,8 @@ fetch-gcc: .fetch-gcc-$(GCC_VERSION) .fetch-gmp-$(GMP_VERSION) .fetch-mpfr-$(MPF
 
 extract-gcc: .extract-gcc-$(GCC_VERSION)
 
-.configure-gcc-$(GCC_VERSION): .extract-gcc-$(GCC_VERSION) .install-isl-$(ISL_VERSION) .install-cloog-$(CLOOG_VERSION)
-	cd $(GCC_BUILD_DIR) && ac_cv_lib_pwl_PWL_handle_timeout=no ./configure --prefix=$(GCC_INSTALL_DIR) --with-isl=$(ISL_INSTALL_DIR) --with-cloog=$(CLOOG_INSTALL_DIR) --enable-build-with-cxx $(GCC_BUILD_FLAGS)
+.configure-gcc-$(GCC_VERSION): .extract-gcc-$(GCC_VERSION) .install-isl-$(ISL_VERSION)
+	cd $(GCC_BUILD_DIR) && ac_cv_lib_pwl_PWL_handle_timeout=no ./configure --prefix=$(GCC_INSTALL_DIR) --with-isl=$(ISL_INSTALL_DIR) --enable-build-with-cxx $(GCC_BUILD_FLAGS)
 	@$(TOUCH) $@
 
 configure-gcc: .configure-gcc-$(GCC_VERSION)
@@ -1056,13 +1003,13 @@ install-gcc: .build-gcc-$(GCC_VERSION)
 	cd $(GCC_BUILD_DIR) && $(MAKE) install
 	cd $(GMP_INSTALL_DIR) && $(CP) include `$(GCC_INSTALL_DIR)/bin/gcc -print-file-name=plugin`
 
-clean-gcc: clean-gmp clean-mpfr clean-mpc clean-isl clean-cloog
+clean-gcc: clean-gmp clean-mpfr clean-mpc clean-isl
 	@$(RM) .build-gcc-$(GCC_VERSION)
 	@$(RM) .configure-gcc-$(GCC_VERSION)
 	@$(RM) .extract-gcc-$(GCC_VERSION)
 	$(RM) $(GCC_BUILD_DIR)
 
-distclean-gcc: clean-gcc distclean-gmp distclean-mpfr distclean-mpc distclean-isl distclean-cloog
+distclean-gcc: clean-gcc distclean-gmp distclean-mpfr distclean-mpc distclean-isl
 	@$(RM) .fetch-gcc-$(GCC_VERSION)
 	$(RM) $(GCC_TARBALL)
 
@@ -1114,7 +1061,7 @@ extract-halmd: .extract-halmd-$(HALMD_VERSION)
 
 .configure-halmd-$(HALMD_VERSION): .extract-halmd-$(HALMD_VERSION)
 	$(MKDIR) $(HALMD_BUILD_DIR)
-	cd $(HALMD_BUILD_DIR) && $(HALMD_BUILD_ENV) cmake -DCMAKE_INSTALL_PREFIX=$(HALMD_INSTALL_DIR) $(CURDIR)/$(HALMD_SOURCE_DIR)
+	cd $(HALMD_BUILD_DIR) && $(HALMD_BUILD_ENV) $(CMAKE) -DCMAKE_INSTALL_PREFIX=$(HALMD_INSTALL_DIR) $(CURDIR)/$(HALMD_SOURCE_DIR)
 	@$(TOUCH) $@
 
 configure-halmd: .configure-halmd-$(HALMD_VERSION)
@@ -1124,6 +1071,9 @@ configure-halmd: .configure-halmd-$(HALMD_VERSION)
 	@$(TOUCH) $@
 
 build-halmd: .build-halmd-$(HALMD_VERSION)
+
+test-halmd: .build-halmd-$(HALMD_VERSION)
+	cd $(HALMD_BUILD_DIR) && $(CTEST)
 
 install-halmd: .build-halmd-$(HALMD_VERSION)
 	cd $(HALMD_BUILD_DIR) && $(MAKE) install
@@ -1164,7 +1114,7 @@ fetch-nvcuda-tools: .fetch-nvcuda-tools-$(NVCUDA_TOOLS_VERSION)
 
 .configure-nvcuda-tools-$(NVCUDA_TOOLS_VERSION): .fetch-nvcuda-tools-$(NVCUDA_TOOLS_VERSION)
 	$(MKDIR) $(NVCUDA_TOOLS_BUILD_DIR)
-	cd $(NVCUDA_TOOLS_BUILD_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(NVCUDA_TOOLS_INSTALL_DIR) $(CURDIR)/$(NVCUDA_TOOLS_SOURCE_DIR)
+	cd $(NVCUDA_TOOLS_BUILD_DIR) && $(CMAKE) -DCMAKE_INSTALL_PREFIX=$(NVCUDA_TOOLS_INSTALL_DIR) $(CURDIR)/$(NVCUDA_TOOLS_SOURCE_DIR)
 	@$(TOUCH) $@
 
 configure-nvcuda-tools: .configure-nvcuda-tools-$(NVCUDA_TOOLS_VERSION)
@@ -1194,11 +1144,11 @@ env-nvcuda-tools:
 ##
 ## Ninja - a small build system with a focus on speed
 ##
-NINJA_VERSION = 1.5.1
+NINJA_VERSION = 1.5.3
 NINJA_TARBALL = ninja-$(NINJA_VERSION).tar.gz
 NINJA_TARBALL_REMOTE = v$(NINJA_VERSION).tar.gz
 NINJA_TARBALL_URL = https://github.com/martine/ninja/archive/$(NINJA_TARBALL_REMOTE)
-NINJA_TARBALL_SHA256 = fba77b9ed4b4dd0e86c4513776938dc64bd4508dc2055b04c0c6df68bcfa397d
+NINJA_TARBALL_SHA256 = 7c953b5a7c26cfcd082882e3f3e2cd08fee8848ad228bb47223b18ea18777ec0
 NINJA_BUILD_DIR = ninja-$(NINJA_VERSION)
 NINJA_CONFIGURE_FLAGS =
 NINJA_INSTALL_DIR = $(PREFIX)/ninja-$(NINJA_VERSION)
@@ -1219,7 +1169,7 @@ fetch-ninja: .fetch-ninja-$(NINJA_VERSION)
 extract-ninja: .extract-ninja-$(NINJA_VERSION)
 
 .build-ninja-$(NINJA_VERSION): .extract-ninja-$(NINJA_VERSION)
-	cd $(NINJA_BUILD_DIR) && ./bootstrap.py $(NINJA_CONFIGURE_FLAGS)
+	cd $(NINJA_BUILD_DIR) && ./configure.py --bootstrap $(NINJA_CONFIGURE_FLAGS)
 	@$(TOUCH) $@
 
 build-ninja: .build-ninja-$(NINJA_VERSION)

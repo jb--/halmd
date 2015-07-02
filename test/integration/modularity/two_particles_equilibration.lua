@@ -29,32 +29,6 @@ local writers = halmd.io.writers
 local utility = halmd.utility
 
 --
--- copy subset of particles to a new particle instance
--- FIXME replace by genuine method of mdsim.particle avoiding needless copying
---
-local function copy_particle(args)
-    local box = assert(args.box)
-    local group = assert(args.group)
-    local particle = group.particle
-    local label = args.label or particle.label
-
-    local new_particle = mdsim.particle({
-        dimension = box.dimension
-      , particles = group.size
-      , species = group.particle.nspecies
-      , memory = particle.memory
-      , label = label
-    })
-    local input = observables.phase_space({box = box, group = group}):acquire({memory = "host"})
-    observables.phase_space({
-        box = box
-      , group = mdsim.particle_groups.all({particle = new_particle, global = false})
-    }):set(input(nil)) -- FIXME calling a data slot from Lua requires a dummy argument
-
-    return new_particle
-end
-
---
 -- Setup and equilibrate mixture using two distinct instances of the particle module
 --
 local function setup(args)
@@ -101,12 +75,9 @@ local function setup(args)
     mdsim.velocities.boltzmann({particle = particle, temperature = temp0}):set()
 
     -- split global particle instance in two particle instances, one per species
-    -- FIXME we need particle:copy()
     local particle_ = {
---        A = particle:copy({selection = groups["A"], label = "A"})
---      , B = particle:copy({selection = groups["B"], label = "B"})
-        A = copy_particle({box = box, group = groups["A"], label = "A"})
-      , B = copy_particle({box = box, group = groups["B"], label = "B"})
+        A = groups["A"]:to_particle({label = "A"})
+      , B = groups["B"]:to_particle({label = "B"})
     }
     particle.disconnect() -- needed?
     particle = particle_; particle_ = nil
@@ -124,15 +95,36 @@ local function setup(args)
         }
       , cutoff = 2.5
     })
+
+    -- create binning modules explicitly and therefore only once for each particle instance
+    local binning = {
+        A = mdsim.binning({
+            box = box
+          , particle = particle["A"]
+          , r_cut = potential.r_cut
+        })
+      , B = mdsim.binning({
+            box = box
+          , particle = particle["B"]
+          , r_cut = potential.r_cut
+        })
+    }
     -- define interaction forces with smoothly truncated potential
     local force = {}
     local trunc = mdsim.forces.trunc.local_r4({h = 0.005})
     for label1, p1 in pairs(particle) do
         for label2, p2 in pairs(particle) do
+            local neighbour = mdsim.neighbour({
+                box = box
+              , particle = { p1, p2 }
+              , r_cut = potential.r_cut
+              , binning = { binning[label1], binning[label2] }
+            })
             force[label1 .. label2] = mdsim.forces.pair_trunc({
                 box = box
               , particle = { p1, p2 }
               , potential = potential, trunc = trunc
+              , neighbour = neighbour
             })
         end
     end

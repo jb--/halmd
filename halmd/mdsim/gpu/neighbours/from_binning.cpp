@@ -1,6 +1,6 @@
 /*
- * Copyright © 2008-2014 Felix Höfling
- * Copyright © 2013-2014 Nicolas Höft
+ * Copyright © 2008-2015 Felix Höfling
+ * Copyright © 2013-2015 Nicolas Höft
  * Copyright © 2008-2011 Peter Colberg
  *
  * This file is part of HALMD.
@@ -133,6 +133,22 @@ from_binning<dimension, float_type>::g_neighbour()
 }
 
 /**
+ * Test compatibility of binning parameters with this neighbour list algorithm
+ *
+ * On the GPU, the binning module is required to have at least 3 cells
+ * in each spatial direction in order to be used with the neighbour module.
+ */
+template <int dimension, typename float_type>
+bool from_binning<dimension, float_type>::is_binning_compatible(
+    std::shared_ptr<binning_type const> binning1
+  , std::shared_ptr<binning_type const> binning2
+)
+{
+    auto ncell = binning2->ncell();
+    return *std::min_element(ncell.begin(), ncell.end()) >= 3;
+}
+
+/**
  * Update neighbour lists
  */
 template <int dimension, typename float_type>
@@ -145,8 +161,7 @@ void from_binning<dimension, float_type>::update()
 
     LOG_TRACE("update neighbour lists");
 
-    typename binning_type::cell_size_type ncell = binning2_->ncell();
-    if (*std::min_element(ncell.begin(), ncell.end()) < 3) {
+    if (!is_binning_compatible(binning1_, binning2_)) {
         throw std::logic_error("number of cells per dimension must be at least 3");
     }
 
@@ -281,6 +296,7 @@ void from_binning<dimension, float_type>::luaopen(lua_State* L)
                   , algorithm
                   , std::shared_ptr<logger>
                 >)
+              , def("is_binning_compatible", &from_binning::is_binning_compatible)
             ]
           , namespace_(defaults_name.c_str())
             [
