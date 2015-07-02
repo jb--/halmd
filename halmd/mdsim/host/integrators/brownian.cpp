@@ -93,7 +93,8 @@ void brownian<dimension, float_type>::integrate()
     // loop over all particles
     for (size_type i = 0; i < nparticle; ++i) {
         vector_type& r = (*position)[i];
-        f_rand *= 0;
+        vector_type& v = (*velocity)[i];
+        f_rand = 0;
         
         // stochastic coupling with heat bath
         if (temperature_ != 0) {
@@ -112,7 +113,8 @@ void brownian<dimension, float_type>::integrate()
                 rng_cache_valid = !rng_cache_valid;
             }
         }
-        r += (force[i] + f_rand) * timestep_by_mobility_;
+        v = (force[i] + f_rand);
+        r += v * timestep_by_mobility_;
         (*image)[i] += box_->reduce_periodic(r);
     }
 }
@@ -120,15 +122,6 @@ void brownian<dimension, float_type>::integrate()
 template <int dimension, typename float_type>
 void brownian<dimension, float_type>::finalize()
 {
-    LOG_TRACE("update velocities")
-
-    force_array_type const& force = read_cache(particle_->force());
-    mass_array_type const& mass = read_cache(particle_->mass());
-    size_type nparticle = particle_->nparticle();
-
-    // invalidate the particle caches after accessing the force!
-    auto velocity = make_cache_mutable(particle_->velocity());
-
     scoped_timer_type timer(runtime_.finalize);
 }
 
