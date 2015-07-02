@@ -48,7 +48,7 @@ check_shape(T const& m1, S const& m2)
 }
 
 /**
- * Initialise power law potential parameters
+ * Initialise parabolic potential parameters
  */
 template <typename float_type>
 parabolic<float_type>::parabolic(
@@ -75,7 +75,7 @@ parabolic<float_type>::parabolic(
     }
 
     LOG("interaction strength: ε = " << epsilon_);
-    LOG("power law index: n = " << index_);
+    LOG("parabolic index: n = " << index_);
     LOG("cutoff length: r_c = " << r_cut_);
     LOG("cutoff energy: U = " << en_cut_);
 

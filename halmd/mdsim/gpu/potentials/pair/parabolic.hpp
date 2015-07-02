@@ -103,7 +103,7 @@ public:
 private:
     /** potential well depths in MD units */
     matrix_type epsilon_;
-    /** power law index */
+    /** parabolic index */
     uint_matrix_type index_;
     /** cutoff length in MD units */
     matrix_type r_cut_;
