@@ -7,10 +7,13 @@ halmd_add_library(halmd_mdsim_gpu_integrators
   verlet_nvt_andersen.cpp
   verlet_nvt_hoover_kernel.cu
   verlet_nvt_hoover.cpp
+  brownian_kernel.cu
+  brownian.cpp
 )
 halmd_add_modules(
   libhalmd_mdsim_gpu_integrators_euler
   libhalmd_mdsim_gpu_integrators_verlet
   libhalmd_mdsim_gpu_integrators_verlet_nvt_andersen
   libhalmd_mdsim_gpu_integrators_verlet_nvt_hoover
+  libhalmd_mdsim_gpu_integrators_brownian
 )
